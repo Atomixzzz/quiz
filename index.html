@@ -30,7 +30,7 @@
     // Log play to Firebase
     function logPlay() {
       const timestamp = new Date().toISOString(); // เวลาปัจจุบัน
-      const logRef = ref(database, 'plays'); // เขียนข้อมูลไปที่ฐานข้อมูล Firebase
+      const logRef = ref(database, 'plays'); // สร้าง reference สำหรับเก็บข้อมูลใน Firebase
       push(logRef, {
         time: timestamp
       });
