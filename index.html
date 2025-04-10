@@ -11,21 +11,22 @@
       font-family: sans-serif;
       background-color: #f5f5f5;
       color: #333;
-      text-align: center;
-      height: 100%;
-      box-sizing: border-box;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .container {
       width: 100%;
       max-width: 480px;
-      margin: 0 auto;
       padding: 20px;
+      text-align: center;
     }
     .question {
       font-size: 18px;
       margin: 30px 0 15px;
     }
-    .answers button, .start-btn, .next-btn {
+    .answers button, .start-btn, .next-btn, .restart-btn {
       width: 100%;
       max-width: 320px;
       margin: 10px auto;
@@ -33,14 +34,14 @@
       font-size: 16px;
       border: none;
       border-radius: 8px;
-      background-color: #333;
-      color: white;
+      background-color: #fcebd5;
+      color: #333;
       cursor: pointer;
       display: block;
       transition: background-color 0.3s;
     }
-    .answers button:hover, .start-btn:hover, .next-btn:hover {
-      background-color: #555;
+    .answers button:hover, .start-btn:hover, .next-btn:hover, .restart-btn:hover {
+      background-color: #f5ddbc;
     }
     .result {
       font-size: 20px;
@@ -57,10 +58,25 @@
     .fade.show {
       opacity: 1;
     }
+    .progress {
+      width: 100%;
+      height: 8px;
+      background: #ddd;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .progress-bar {
+      height: 100%;
+      background: #333;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
   </style>
 </head>
 <body>
   <div class="container">
+    <div class="progress"><div class="progress-bar" id="progress-bar"></div></div>
     <div id="quiz" class="fade show"></div>
     <div class="result" id="result"></div>
   </div>
@@ -98,6 +114,11 @@
       s.play().catch(() => {});
     }
 
+    function updateProgress() {
+      const percent = ((current + 1) / questions.length) * 100;
+      document.getElementById("progress-bar").style.width = `${percent}%`;
+    }
+
     function fadeContent(callback) {
       const qz = document.getElementById("quiz");
       qz.classList.remove("show");
@@ -112,6 +133,7 @@
       current = -1;
       score = [0, 0, 0, 0];
       document.getElementById("result").innerHTML = "";
+      updateProgress();
       fadeContent(() => showTransition("พร้อมจะเริ่มยัง?", "เริ่มเลย!", nextQuestion));
     }
 
@@ -120,27 +142,38 @@
       qz.innerHTML = `
         <div class="transition">${msg}</div>
         <button class="next-btn" id="next-btn">${btn}</button>
+        <button class="restart-btn" id="restart-btn">เริ่มใหม่</button>
       `;
       document.getElementById("next-btn").addEventListener("click", () => {
         playClick();
         callback();
       });
+      document.getElementById("restart-btn").addEventListener("click", () => {
+        playClick();
+        startQuiz();
+      });
     }
 
     function nextQuestion() {
       current++;
+      updateProgress();
       if (current < questions.length) {
         fadeContent(() => {
           const q = questions[current];
           const qz = document.getElementById("quiz");
           qz.innerHTML = `<div class="question">${q.q}</div>`;
           const btns = q.a.map((choice, i) => `<button class="answer-btn" data-index="${i}">${choice}</button>`).join("");
-          qz.innerHTML += `<div class="answers">${btns}</div>`;
+          qz.innerHTML += `<div class="answers">${btns}</div><button class="restart-btn" id="restart-btn">เริ่มใหม่</button>`;
+
           document.querySelectorAll(".answer-btn").forEach(btn => {
             btn.addEventListener("click", e => {
               playClick();
               selectAnswer(parseInt(e.target.dataset.index));
             });
+          });
+          document.getElementById("restart-btn").addEventListener("click", () => {
+            playClick();
+            startQuiz();
           });
         });
       } else {
@@ -163,8 +196,14 @@
     function showResult() {
       const max = Math.max(...score);
       const typeIndex = score.indexOf(max);
-      document.getElementById("quiz").innerHTML = "";
-      document.getElementById("result").innerHTML = `คุณคือ <strong>${types[typeIndex]}</strong>`;
+      document.getElementById("quiz").innerHTML = `
+        <div class="result">คุณคือ <strong>${types[typeIndex]}</strong></div>
+        <button class="restart-btn" id="restart-btn">เริ่มใหม่</button>
+      `;
+      document.getElementById("restart-btn").addEventListener("click", () => {
+        playClick();
+        startQuiz();
+      });
     }
 
     document.getElementById("quiz").innerHTML = `
@@ -178,4 +217,3 @@
   </script>
 </body>
 </html>
-
