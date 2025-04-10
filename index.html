@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz ธาตุประจำตัว</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      text-align: center;
+      height: 100%;
+      box-sizing: border-box;
+    }
+    .container {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .question {
+      font-size: 18px;
+      margin: 30px 0 15px;
+    }
+    .answers button, .start-btn, .next-btn {
+      width: 100%;
+      max-width: 320px;
+      margin: 10px auto;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #333;
+      color: white;
+      cursor: pointer;
+      display: block;
+      transition: background-color 0.3s;
+    }
+    .answers button:hover, .start-btn:hover, .next-btn:hover {
+      background-color: #555;
+    }
+    .result {
+      font-size: 20px;
+      margin-top: 30px;
+    }
+    .intro, .transition {
+      font-size: 18px;
+      margin-top: 100px;
+    }
+    .fade {
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    .fade.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="quiz" class="fade show"></div>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        q: "วันหยุดในฝันของคุณคือแบบไหน?",
+        a: ["เดินป่า", "ริมทะเล", "เปลี่ยนตามใจ", "ผจญภัย"]
+      },
+      {
+        q: "เวลามีเรื่องเครียด คุณมักจะ...",
+        a: ["เงียบไว้ก่อน", "เล่าให้เพื่อนฟัง", "ออกไปเดินเล่น", "ลงมือเลย"]
+      },
+      {
+        q: "คนอื่นบอกว่าคุณเป็น...",
+        a: ["ใจเย็น", "นุ่มนวล", "ขี้เล่น", "มั่นใจ"]
+      },
+      {
+        q: "ถ้าเพื่อนมีปัญหา คุณจะ...",
+        a: ["อยู่เงียบๆ", "ฟังและเข้าใจ", "พาไปเที่ยว", "ให้กำลังใจทันที"]
+      },
+      {
+        q: "ถ้าเป็นธรรมชาติ จะเป็น...",
+        a: ["ภูเขา", "สายน้ำ", "สายลม", "ไฟลุก"]
+      }
+    ];
+
+    const types = ["ธาตุดิน 🌱", "ธาตุน้ำ 💧", "ธาตุลม 🌬️", "ธาตุไฟ 🔥"];
+    let current = -1;
+    let score = [0, 0, 0, 0];
+
+    function playClick() {
+      const s = new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_78d2103b47.mp3?filename=click-124467.mp3");
+      s.play().catch(() => {});
+    }
+
+    function fadeContent(callback) {
+      const qz = document.getElementById("quiz");
+      qz.classList.remove("show");
+      setTimeout(() => {
+        callback();
+        qz.classList.add("show");
+      }, 300);
+    }
+
+    function startQuiz() {
+      playClick();
+      current = -1;
+      score = [0, 0, 0, 0];
+      document.getElementById("result").innerHTML = "";
+      fadeContent(() => showTransition("พร้อมจะเริ่มยัง?", "เริ่มเลย!", nextQuestion));
+    }
+
+    function showTransition(msg, btn, callback) {
+      const qz = document.getElementById("quiz");
+      qz.innerHTML = `
+        <div class="transition">${msg}</div>
+        <button class="next-btn" id="next-btn">${btn}</button>
+      `;
+      document.getElementById("next-btn").addEventListener("click", () => {
+        playClick();
+        callback();
+      });
+    }
+
+    function nextQuestion() {
+      current++;
+      if (current < questions.length) {
+        fadeContent(() => {
+          const q = questions[current];
+          const qz = document.getElementById("quiz");
+          qz.innerHTML = `<div class="question">${q.q}</div>`;
+          const btns = q.a.map((choice, i) => `<button class="answer-btn" data-index="${i}">${choice}</button>`).join("");
+          qz.innerHTML += `<div class="answers">${btns}</div>`;
+          document.querySelectorAll(".answer-btn").forEach(btn => {
+            btn.addEventListener("click", e => {
+              playClick();
+              selectAnswer(parseInt(e.target.dataset.index));
+            });
+          });
+        });
+      } else {
+        fadeContent(() => {
+          playClick();
+          showResult();
+        });
+      }
+    }
+
+    function selectAnswer(index) {
+      score[index]++;
+      if (current + 1 < questions.length) {
+        fadeContent(() => showTransition("ไปต่อ!", "คำถามถัดไป", nextQuestion));
+      } else {
+        nextQuestion();
+      }
+    }
+
+    function showResult() {
+      const max = Math.max(...score);
+      const typeIndex = score.indexOf(max);
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("result").innerHTML = `คุณคือ <strong>${types[typeIndex]}</strong>`;
+    }
+
+    // เริ่มต้น
+    document.getElementById("quiz").innerHTML = `
+      <div class="intro">ทายนิสัยจากพลังธรรมชาติทั้ง 4 🌍💧🌬️🔥</div>
+      <button class="start-btn" id="start-btn">เริ่มเล่น</button>
+    `;
+    document.getElementById("start-btn").addEventListener("click", () => {
+      playClick();
+      startQuiz();
+    });
+  </script>
+</body>
+</html>
