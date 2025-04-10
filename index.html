@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quiz ธาตุประจำตัวของคุณ</title>
+  <title>Quiz ธาตุประจำตัว</title>
 
   <script type="module">
     // Import the functions you need from the SDKs you need
@@ -60,14 +60,24 @@
       setTimeout(() => {
         document.getElementById("play-count").style.display = "none"; // ซ่อนหลังจาก 3 วินาที
       }, 3000);
+      
+      // เริ่มคำถาม
+      nextQuestion();
     }
 
-    // แสดงปุ่มเริ่มใหม่ตอนหน้าสุดท้าย
+    // การแสดงผลลัพธ์
     function showResult() {
       const result = document.getElementById("result");
-      result.innerHTML = `<div class="result">คุณคือ <strong>${types[typeIndex]}</strong></div>
+      result.innerHTML = `<div class="result">คุณคือ <strong>ธาตุไฟ 🔥</strong></div>
         <button class="restart-btn" id="restart-btn" onclick="startQuiz()">เริ่มใหม่</button>`;
       document.getElementById("restart-btn").style.display = "block"; // แสดงปุ่มเริ่มใหม่
+    }
+
+    // คำถามถัดไป
+    function nextQuestion() {
+      // ตรงนี้คุณต้องเพิ่มโค้ดการแสดงคำถามและตัวเลือก
+      // แล้วจะไปที่หน้าผลลัพธ์สุดท้ายเมื่อเล่นเสร็จ
+      setTimeout(showResult, 2000); // ตัวอย่างการแสดงผลหลังจาก 2 วินาที
     }
 
     window.onload = function() {
